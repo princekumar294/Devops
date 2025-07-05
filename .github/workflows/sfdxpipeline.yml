@@ -27,7 +27,7 @@ jobs:
         run: |
           sf org login jwt \
             --client-id ${{ secrets.SF_CONSUMER_KEY }} \
-            --jwt-key-file server.key \
+            --jwt-key-file build/server.key \
             --username ${{ secrets.SF_USERNAME }} \
             --alias ${{ secrets.SF_ORG_ALIAS }} \
             --set-default

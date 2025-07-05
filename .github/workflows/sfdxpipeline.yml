@@ -1,0 +1,40 @@
+name: Salesforce Deploy
+
+on:
+  push:
+    branches:
+      - master   # or your deployment branch
+
+jobs:
+  deploy-to-salesforce:
+    name: Deploy to Salesforce
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global @salesforce/cli
+
+      - name: Create private key file
+        run: |
+          echo "${{ secrets.SF_PRIVATE_KEY }}" > server.key
+        shell: bash
+
+      - name: Authenticate with Salesforce Org (JWT)
+        run: |
+          sf org login jwt \
+            --client-id ${{ secrets.SF_CONSUMER_KEY }} \
+            --jwt-key-file server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --alias ${{ secrets.SF_ORG_ALIAS }} \
+            --set-default
+
+      - name: Deploy Metadata
+        run: |
+          sf project deploy start --metadata-dir force-app --wait 10 --target-org ${{ secrets.SF_ORG_ALIAS }}
+
+      - name: Clean up private key
+        run: rm -f server.key
